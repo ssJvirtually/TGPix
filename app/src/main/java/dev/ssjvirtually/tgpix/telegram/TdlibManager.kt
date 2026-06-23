@@ -511,6 +511,8 @@ open class TdlibManager {
                 db.dao().clearAll()
                 db.albumDao().clearAllAlbums()
                 db.albumDao().clearAllAlbumPhotos()
+                db.eventDao().clearAll()
+                db.deviceDao().clearAll()
                 addLog("Cleared all local database tables.")
             } catch (e: Exception) {
                 addLog("Failed to clear local database tables: ${e.message}")

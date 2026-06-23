@@ -96,7 +96,7 @@ open class HistorySyncManager {
                 val entities = mutableListOf<CloudPhotoEntity>()
                 for (msg in result.messages) {
                     val content = msg.content
-                    if (content is TdApi.MessageDocument && content.caption.text.contains("#tgpix_album")) {
+                    if (content is TdApi.MessageDocument && (content.caption?.text ?: "").contains("#tgpix_album")) {
                         try {
                             BackupManager.reconstructAlbum(context, msg)
                         } catch (e: Exception) {
@@ -138,7 +138,7 @@ open class HistorySyncManager {
                             width = largest.width
                             height = largest.height
                             
-                            val captionText = content.caption.text
+                            val captionText = content.caption?.text ?: ""
                             metadata = parseMetadataFromCaption(captionText)
                             if (metadata != null) {
                                 fileName = metadata.name
@@ -158,7 +158,7 @@ open class HistorySyncManager {
                     } else if (content is TdApi.MessageDocument) {
                         val doc = content.document
                         val docName = if (doc.fileName.isNotEmpty()) doc.fileName else {
-                            val captionText = content.caption.text
+                            val captionText = content.caption?.text ?: ""
                             if (captionText.isNotEmpty()) captionText.substringBefore("\n").trim() else "doc_${msg.id}"
                         }
                         
@@ -178,7 +178,7 @@ open class HistorySyncManager {
                             width = doc.thumbnail?.width ?: 0
                             height = doc.thumbnail?.height ?: 0
                             
-                            val captionText = content.caption.text
+                            val captionText = content.caption?.text ?: ""
                             metadata = parseMetadataFromCaption(captionText)
                             if (metadata != null) {
                                 fileName = metadata.name
@@ -202,10 +202,13 @@ open class HistorySyncManager {
                     } else null
 
                     if (fileId != 0 && fileName.isNotEmpty()) {
+                        // Ensure fingerprint is unique even if metadata parsing fails or dates collide.
+                        // We include messageId as a suffix when hash is missing to guarantee uniqueness
+                        // and prevent the catastrophic "Delete All" loop seen in previous versions.
                         val computedFingerprint = if (metadata != null && metadata.hash.isNotEmpty()) {
                             "${fileName}_${fileSize}_${dateTaken}_${metadata.hash}"
                         } else {
-                            "${fileName}_${fileSize}_${dateTaken}"
+                            "${fileName}_${fileSize}_${dateTaken}_msg_${msg.id}"
                         }
                         val isHdValue = metadata?.isHd ?: !isDoc
                         val originalSizeValue = metadata?.originalSizeBytes ?: fileSize
@@ -261,29 +264,10 @@ open class HistorySyncManager {
         }
         TdlibManager.addLog("Vault server synchronization crawl completed.")
 
-        // Clean up duplicate photo uploads from both Telegram and local database
-        // Skip after a snapshot restore: the snapshot + crawl naturally produce
-        // overlapping records via INSERT OR REPLACE, and the duplicate query may
-        // incorrectly match restored records with empty/legacy fingerprints.
-        // Also skip when the crawl indexed zero new records — a no-op delta crawl
-        // that terminated immediately on the first existing message must never
-        // trigger destructive deduplication, which permanently deletes photos
-        // from both the local DB and the Telegram vault channel.
-        if (!skipDuplicateCleanup && totalRecovered > 0) {
-            try {
-                val duplicates = cloudDao.getDuplicateMessageIds()
-                if (duplicates.isNotEmpty()) {
-                    TdlibManager.addLog("Found ${duplicates.size} duplicate messages in server vault. Deleting duplicates from Telegram...")
-                    TdlibManager.sendRequest(TdApi.DeleteMessages(chatId, duplicates.toLongArray(), true))
-                    cloudDao.deleteDuplicatesFromCloudPhotos()
-                    TdlibManager.addLog("Local database duplicate cloud photos cleaned up.")
-                }
-            } catch (e: Exception) {
-                TdlibManager.addLog("Failed to clean up duplicate vault messages: ${e.message}")
-            }
-        } else {
-            TdlibManager.addLog("Skipping duplicate cleanup (skipDuplicateCleanup=$skipDuplicateCleanup, totalRecovered=$totalRecovered).")
-        }
+        // DEPRECATED: Automatic cloud deletion is permanently disabled for data safety.
+        // We never delete messages from Telegram automatically based on heuristics.
+        // Storage is unlimited, and data integrity is our highest priority.
+        TdlibManager.addLog("Cloud history synchronization completed.")
         
         // Trigger storage cache cleanup to stay within 500 MB limit
         try {
@@ -322,7 +306,7 @@ open class HistorySyncManager {
                 width = largest.width
                 height = largest.height
                 
-                val captionText = content.caption.text
+                val captionText = content.caption?.text ?: ""
                 metadata = parseMetadataFromCaption(captionText)
                 if (metadata != null) {
                     fileName = metadata.name
@@ -342,7 +326,7 @@ open class HistorySyncManager {
         } else if (content is TdApi.MessageDocument) {
             val doc = content.document
             val docName = if (doc.fileName.isNotEmpty()) doc.fileName else {
-                val captionText = content.caption.text
+                val captionText = content.caption?.text ?: ""
                 if (captionText.isNotEmpty()) captionText.substringBefore("\n").trim() else "doc_${msg.id}"
             }
             
@@ -359,7 +343,7 @@ open class HistorySyncManager {
                 width = doc.thumbnail?.width ?: 0
                 height = doc.thumbnail?.height ?: 0
                 
-                val captionText = content.caption.text
+                val captionText = content.caption?.text ?: ""
                 metadata = parseMetadataFromCaption(captionText)
                 if (metadata != null) {
                     fileName = metadata.name
@@ -375,11 +359,16 @@ open class HistorySyncManager {
         }
         
         if (fileId != 0 && fileName.isNotEmpty()) {
+            // Ensure fingerprint uniqueness for real-time indexing as well.
             val computedFingerprint = if (metadata != null && metadata.hash.isNotEmpty()) {
                 "${fileName}_${fileSize}_${dateTaken}_${metadata.hash}"
             } else {
-                "${fileName}_${fileSize}_${dateTaken}"
+                "${fileName}_${fileSize}_${dateTaken}_msg_${msg.id}"
             }
+            
+            // Check if already indexed to prevent double-logging and redundant database writes
+            if (cloudDao.exists(msg.id)) return
+
             val isHdValue = metadata?.isHd ?: !isDoc
             val originalSizeValue = metadata?.originalSizeBytes ?: fileSize
             
@@ -409,7 +398,7 @@ open class HistorySyncManager {
             )
             
             cloudDao.insertBatch(listOf(entity))
-            TdlibManager.addLog("Indexed uploaded photo '${fileName}' into database in real-time.")
+            TdlibManager.addLog("Indexed uploaded photo '${fileName}' (Message ID: ${msg.id}).")
         }
     }
 

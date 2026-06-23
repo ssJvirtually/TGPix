@@ -125,10 +125,10 @@ interface CloudPhotoDao {
     @Query("SELECT EXISTS(SELECT 1 FROM cloud_photos WHERE messageId = :messageId)")
     suspend fun exists(messageId: Long): Boolean
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertBatch(photos: List<CloudPhotoEntity>)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(photo: CloudPhotoEntity)
 
     @Query("UPDATE cloud_photos SET telegramFileId = :fileId, telegramThumbnailFileId = :thumbFileId, fileIdCachedAt = :cachedAt, localCachedThumbnailPath = :path WHERE messageId = :messageId")

@@ -94,6 +94,9 @@ fun AppNavigation() {
             is TdApi.AuthorizationStateWaitCode -> {
                 OtpVerifyScreen()
             }
+            is TdApi.AuthorizationStateWaitPassword -> {
+                PasswordVerifyScreen()
+            }
             is TdApi.AuthorizationStateReady -> {
                 if (selectedChatId.value == 0L) {
                     AutoVaultSetupScreen(

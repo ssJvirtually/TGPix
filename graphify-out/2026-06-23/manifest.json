@@ -10,8 +10,8 @@
     "semantic_hash": ""
   },
   "app/src/main/java/dev/ssjvirtually/tgpix/storage/BackupManager.kt": {
-    "mtime": 1781514233.7794952,
-    "ast_hash": "87eced03b3e50aac2fcce4e20e66e237",
+    "mtime": 1781454267.9092479,
+    "ast_hash": "b70d82d303a3161ce41151c47f4c0881",
     "semantic_hash": ""
   },
   "app/src/main/java/dev/ssjvirtually/tgpix/storage/FolderScanner.kt": {
@@ -30,18 +30,18 @@
     "semantic_hash": ""
   },
   "app/src/main/java/dev/ssjvirtually/tgpix/storage/UploadDatabase.kt": {
-    "mtime": 1781512436.0705647,
-    "ast_hash": "f171b0f0d29b54f01721ef7ab8b96037",
+    "mtime": 1781454568.2200184,
+    "ast_hash": "8d9ee4fc2ba987a6e27f88f3f042a2a9",
     "semantic_hash": ""
   },
   "app/src/main/java/dev/ssjvirtually/tgpix/telegram/AuthManager.kt": {
-    "mtime": 1781511485.402067,
-    "ast_hash": "dad9b39ce02afb3eafee5196ec741fc1",
-    "semantic_hash": ""
+    "mtime": 1780425463.327345,
+    "ast_hash": "e6ecf48324df06c1ee7068880bcdf56a",
+    "semantic_hash": "e6ecf48324df06c1ee7068880bcdf56a"
   },
   "app/src/main/java/dev/ssjvirtually/tgpix/telegram/TdlibManager.kt": {
-    "mtime": 1782212251.0431128,
-    "ast_hash": "98869fb38403ac359fdbb8f10f4e0920",
+    "mtime": 1781457687.5954528,
+    "ast_hash": "e633998e3d45b28b96b1ef86e6abee6f",
     "semantic_hash": ""
   },
   "app/src/main/java/dev/ssjvirtually/tgpix/telegram/UploadManager.kt": {
@@ -50,8 +50,8 @@
     "semantic_hash": ""
   },
   "app/src/main/java/dev/ssjvirtually/tgpix/ui/AppNavigation.kt": {
-    "mtime": 1781511492.917792,
-    "ast_hash": "f52b2225e0d2cd12e3324820995082ea",
+    "mtime": 1781417385.9757197,
+    "ast_hash": "90862c54f9e1a3e47547d2782120ed44",
     "semantic_hash": ""
   },
   "app/src/main/java/dev/ssjvirtually/tgpix/ui/screens/AlbumsScreen.kt": {
@@ -65,9 +65,9 @@
     "semantic_hash": ""
   },
   "app/src/main/java/dev/ssjvirtually/tgpix/ui/screens/OtpVerifyScreen.kt": {
-    "mtime": 1781511482.6356156,
-    "ast_hash": "0ef494423ddd3231a2303b29fb73ed4c",
-    "semantic_hash": ""
+    "mtime": 1780426230.3133397,
+    "ast_hash": "24025d8d1dfe01be55e61201d8647223",
+    "semantic_hash": "24025d8d1dfe01be55e61201d8647223"
   },
   "app/src/main/java/dev/ssjvirtually/tgpix/ui/screens/PhoneLoginScreen.kt": {
     "mtime": 1781458518.3608878,
@@ -280,8 +280,8 @@
     "semantic_hash": ""
   },
   "app/src/main/java/dev/ssjvirtually/tgpix/telegram/HistorySyncManager.kt": {
-    "mtime": 1781514151.9097378,
-    "ast_hash": "468f7c9ec9d2932b888f9965caf7ca32",
+    "mtime": 1781506958.2491,
+    "ast_hash": "4c0dce1a81abf87b3f447877d8146207",
     "semantic_hash": ""
   },
   "app/src/main/java/dev/ssjvirtually/tgpix/ui/AlbumViewModel.kt": {
@@ -372,11 +372,6 @@
   "device_logs.txt": {
     "mtime": 1781443586.6548285,
     "ast_hash": "9ffd41d03d0e177756fa217aad77d5d8",
-    "semantic_hash": ""
-  },
-  "app/src/main/java/dev/ssjvirtually/tgpix/ui/screens/PasswordVerifyScreen.kt": {
-    "mtime": 1781511489.8760707,
-    "ast_hash": "1018d3e9e8433a39fd57bf62ff1ce06c",
     "semantic_hash": ""
   }
 }

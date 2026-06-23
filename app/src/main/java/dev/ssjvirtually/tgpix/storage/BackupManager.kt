@@ -351,9 +351,18 @@ open class BackupManager {
                 val finalCount = db.cloudDao().getRecordCountDirect()
                 val lastCount = PreferencesManager.getLastBackupRecordCount(context)
 
-                // If database is empty but we previously had backups, abort to protect remote
-                if (finalCount == 0 && lastCount > 0) {
-                    TdlibManager.addLog("Backup safety check failed: Local DB is empty, aborting upload to protect remote backup.")
+                // Safety check: Never upload a snapshot that has significantly fewer records than the last successful one.
+                // This prevents accidental data loss if the local database becomes partially corrupted or
+                // out of sync. Since we don't allow deletes for now, the count must only ever increase.
+                if (finalCount < lastCount) {
+                    TdlibManager.addLog("Backup safety check failed: Local record count ($finalCount) is less than last backup count ($lastCount).")
+                    
+                    // If the discrepancy is large (> 50), it suggests this device is out of sync.
+                    // Request a full sync to recover missing records.
+                    if (lastCount - finalCount > 50) {
+                        TdlibManager.addLog("Significant record discrepancy detected. Background sync required.")
+                    }
+
                     return@withContext BackupResult.FAILED
                 }
 
@@ -569,6 +578,9 @@ open class BackupManager {
                     cont.resume(res)
                 }
             }
+            // Add a small delay to allow TDLib to background-load the message history
+            // for the newly opened chat before we start our crawl.
+            delay(2000)
         } catch (e: Exception) {
             ErrorMonitor.log(e)
         }

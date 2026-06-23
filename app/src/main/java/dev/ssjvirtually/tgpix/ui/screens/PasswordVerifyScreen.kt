@@ -7,6 +7,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,6 +17,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -26,8 +30,9 @@ import android.util.Log
 import org.drinkless.tdlib.TdApi
 
 @Composable
-fun OtpVerifyScreen() {
-    var otp by remember { mutableStateOf("") }
+fun PasswordVerifyScreen() {
+    var password by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
@@ -75,26 +80,34 @@ fun OtpVerifyScreen() {
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Verify Code",
+                    text = "Enter Password",
                     color = TelePhotosTheme.TextPrimary,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "An authorization code was sent to your official Telegram app. Please check the official 'Telegram' service chat for your OTP.",
+                    text = "Your Telegram account is protected by a Two-Factor Authentication (2FA) cloud password. Please enter it to authorize this session.",
                     color = TelePhotosTheme.TextSecondary,
                     fontSize = 13.sp,
                     textAlign = TextAlign.Center
                 )
                 Spacer(modifier = Modifier.height(28.dp))
                 OutlinedTextField(
-                    value = otp,
-                    onValueChange = { otp = it },
-                    label = { Text("Code", color = TelePhotosTheme.TextSecondary) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("Cloud Password", color = TelePhotosTheme.TextSecondary) },
+                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
+                    trailingIcon = {
+                        val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                        val description = if (passwordVisible) "Hide password" else "Show password"
+                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                            Icon(imageVector = image, contentDescription = description, tint = TelePhotosTheme.TextSecondary)
+                        }
+                    },
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = TelePhotosTheme.AccentBlue,
                         unfocusedBorderColor = TelePhotosTheme.SurfaceVariant,
@@ -108,19 +121,19 @@ fun OtpVerifyScreen() {
                 Button(
                     onClick = {
                         isLoading = true
-                        AuthManager.verifyOtp(otp) { result ->
+                        AuthManager.verifyPassword(password) { result ->
                             isLoading = false
                             if (result is TdApi.Error) {
-                                Log.e("TGPix", "Failed to verify OTP: [${result.code}] ${result.message}")
+                                Log.e("TGPix", "Failed to verify 2FA password: [${result.code}] ${result.message}")
                                 android.os.Handler(android.os.Looper.getMainLooper()).post {
                                     Toast.makeText(context, "Error: ${result.message}", Toast.LENGTH_LONG).show()
                                 }
                             } else {
-                                Log.i("TGPix", "OTP verified successfully, result: ${result::class.java.simpleName}")
+                                Log.i("TGPix", "2FA password verified successfully, result: ${result::class.java.simpleName}")
                             }
                         }
                     },
-                    enabled = otp.isNotBlank() && !isLoading,
+                    enabled = password.isNotBlank() && !isLoading,
                     colors = ButtonDefaults.buttonColors(containerColor = TelePhotosTheme.AccentBlue),
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(14.dp),

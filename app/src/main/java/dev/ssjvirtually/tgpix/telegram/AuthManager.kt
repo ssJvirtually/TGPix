@@ -17,6 +17,13 @@ object AuthManager {
         }
     }
 
+    fun verifyPassword(password: String, callback: (TdApi.Object) -> Unit) {
+        val request = TdApi.CheckAuthenticationPassword(password)
+        TdlibManager.getClient().send(request) { result ->
+            callback(result)
+        }
+    }
+
     fun logOut(callback: (TdApi.Object) -> Unit) {
         val request = TdApi.LogOut()
         TdlibManager.getClient().send(request) { result ->
@@ -24,3 +31,4 @@ object AuthManager {
         }
     }
 }
+

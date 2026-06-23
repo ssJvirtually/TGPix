@@ -126,18 +126,17 @@ class GalleryViewModel @JvmOverloads constructor(
 
         // Event-driven debounced backup synchronization (checks 5 seconds after databases stop updating)
         viewModelScope.launch(Dispatchers.Default) {
-            combine(cloudLogs, uploadedPaths) { cloud, uploads ->
-                cloud.size + uploads.size
-            }.debounce(5000L)
-             .collect { totalRecords ->
-                 if (totalRecords > 0) {
+            cloudLogs.map { it.size }
+             .debounce(5000L)
+             .collect { currentCloudCount ->
+                 if (currentCloudCount > 0) {
                      // Never schedule a backup while a restore/sync is in progress —
                      // doing so would checkpoint the WAL mid-restore, causing Room
                      // Flows to re-emit stale data and the grid to flicker/empty.
                      if (preferencesManager.isRestoreActive(application) || _isSyncingCloud.value) return@collect
 
                      val lastBackupCount = preferencesManager.getLastBackupRecordCount(application)
-                     if (totalRecords != lastBackupCount) {
+                     if (currentCloudCount != lastBackupCount) {
                          try {
                              backupManager.scheduleBackup(application)
                          } catch (e: Exception) {
