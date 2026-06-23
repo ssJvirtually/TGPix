@@ -1,16 +1,16 @@
-# Graph Report - telegallery-calude  (2026-06-23)
+# Graph Report - telegallery-calude  (2026-06-12)
 
 ## Corpus Check
-- 54 files · ~221,711 words
+- 51 files · ~210,038 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1079 nodes · 1730 edges · 82 communities (65 shown, 17 thin omitted)
+- 1025 nodes · 1654 edges · 81 communities (64 shown, 17 thin omitted)
 - Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 86 edges (avg confidence: 0.86)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `5419b474`
+- Built from commit: `df0745fe`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -90,19 +90,18 @@
 - [[_COMMUNITY_Community 78|Community 78]]
 - [[_COMMUNITY_Community 79|Community 79]]
 - [[_COMMUNITY_Community 80|Community 80]]
-- [[_COMMUNITY_Community 81|Community 81]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `PreferencesManager` - 51 edges
-2. `Context` - 48 edges
-3. `Context` - 48 edges
-4. `TdlibManager` - 47 edges
-5. `BackupManager` - 38 edges
-6. `Long` - 36 edges
+1. `PreferencesManager` - 49 edges
+2. `Context` - 47 edges
+3. `TdlibManager` - 47 edges
+4. `Context` - 46 edges
+5. `BackupManager` - 36 edges
+6. `Long` - 35 edges
 7. `TGPix — Implementation Plan` - 28 edges
 8. `PhotosGridScreen()` - 24 edges
-9. `GalleryViewModel` - 22 edges
-10. `String` - 20 edges
+9. `String` - 20 edges
+10. `List` - 19 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `BackupManager` --references--> `Backup Target - Private Vault`  [INFERRED]
@@ -129,7 +128,7 @@
 - **User Authentication Flow** — screens_phoneloginscreen_phoneloginscreen, screens_otpverifyscreen_otpverifyscreen, screenshots_login_screen_otp_login_form [INFERRED 0.85]
 - **Media Backup and Sync Ecosystem** — screenshots_settings_screen_private_vault, screenshots_gallery_timeline_sync_badges, screenshots_photo_viewer_action_sheet, storage_backupmanager_backupmanager [INFERRED 0.85]
 
-## Communities (82 total, 17 thin omitted)
+## Communities (81 total, 17 thin omitted)
 
 ### Community 0 - "Database and DAO Schema"
 Cohesion: 0.16
@@ -144,16 +143,16 @@ Cohesion: 0.06
 Nodes (35): 1. Unresolved Issues From Previous Review, 2. Critical New Issues, 3. Important New Issues, 4.1 App Startup & Routing Flow, 4.2 Authentication Flow, 4.3 Auto Vault Setup Flow, 4.4 Background Sync & Upload Flow, 4.5 Backup & Recovery Flow (+27 more)
 
 ### Community 3 - "Background Backup Workers"
-Cohesion: 0.06
-Nodes (31): Context, Result, String, ForegroundInfo, Int, Result, ForegroundInfo, Result (+23 more)
+Cohesion: 0.07
+Nodes (27): Context, Result, String, ForegroundInfo, Int, Result, ForegroundInfo, Result (+19 more)
 
 ### Community 4 - "Telegram Client Integration"
 Cohesion: 0.11
 Nodes (25): app/build.gradle, Boolean, Context, Int, List, Long, StateFlow, String (+17 more)
 
 ### Community 5 - "Albums Screen UI and Utils"
-Cohesion: 0.09
-Nodes (33): Context, List, Long, String, Boolean, CloudPhotoEntity, Context, dev (+25 more)
+Cohesion: 0.14
+Nodes (23): Boolean, CloudPhotoEntity, Context, dev, Int, java, List, LocalPhoto (+15 more)
 
 ### Community 6 - "Photos Grid and Search UI"
 Cohesion: 0.12
@@ -161,7 +160,7 @@ Nodes (18): androidx, Boolean, Context, dev, Int, List, LocalPhoto, Set (+10 mor
 
 ### Community 7 - "Database Backup Manager"
 Cohesion: 0.09
-Nodes (45): Boolean, Context, File, Int, List, Long, String, TdApi (+37 more)
+Nodes (44): Boolean, Context, File, Int, List, Long, String, TdApi (+36 more)
 
 ### Community 8 - "Image Upload Manager"
 Cohesion: 0.18
@@ -212,8 +211,8 @@ Cohesion: 0.04
 Nodes (45): Albums, Another Production Trick, Better Strategy, Biggest Problem In Your Current Design, Delete Event, Event Messages?, Flood Wait Concern, For Albums (+37 more)
 
 ### Community 31 - "Community 31"
-Cohesion: 0.14
-Nodes (14): Boolean, Context, Int, lastMessageId, Long, recoveredCount, String, TdApi (+6 more)
+Cohesion: 0.17
+Nodes (11): Boolean, Context, Int, Long, String, TdApi, lastMessageId, recoveredCount (+3 more)
 
 ### Community 32 - "Community 32"
 Cohesion: 0.25
@@ -284,8 +283,8 @@ Cohesion: 0.67
 Nodes (3): 8. Phase 4 — Telegram Storage Integration, Goal, Steps
 
 ### Community 55 - "Community 55"
-Cohesion: 0.08
-Nodes (21): File, Application, Boolean, CloudPhotoEntity, Flow, Job, List, LocalPhoto (+13 more)
+Cohesion: 0.05
+Nodes (30): AndroidViewModel, File, Application, Boolean, CloudPhotoEntity, Flow, List, LocalPhoto (+22 more)
 
 ### Community 57 - "Community 57"
 Cohesion: 0.24
@@ -296,8 +295,8 @@ Cohesion: 0.27
 Nodes (7): CloudPhotoEntity, List, LocalPhoto, String, UploadEntity, MergeResult, PhotosRepository
 
 ### Community 59 - "Community 59"
-Cohesion: 0.06
-Nodes (25): AndroidViewModel, Boolean, Long, StateFlow, Flow, List, LocalPhoto, SearchItem (+17 more)
+Cohesion: 0.24
+Nodes (10): Context, List, Long, String, java, Multi-level Photo Date Fallback Resolution, getFingerprint(), getPartialHash() (+2 more)
 
 ### Community 60 - "Community 60"
 Cohesion: 0.17
@@ -363,12 +362,8 @@ Nodes (3): List, LocalPhoto, LocalPhoto
 Cohesion: 0.50
 Nodes (4): LocalPhoto, GalleryViewModel, toLocalPhoto(), TrashScreen()
 
-### Community 81 - "Community 81"
-Cohesion: 0.17
-Nodes (11): HistorySyncManager, Boolean, Context, Int, lastMessageId, Long, recoveredCount, String (+3 more)
-
 ## Knowledge Gaps
-- **439 isolated node(s):** `ManagedActivityResultLauncher`, `IntentSenderRequest`, `androidx`, `android`, `Bundle` (+434 more)
+- **413 isolated node(s):** `ManagedActivityResultLauncher`, `IntentSenderRequest`, `androidx`, `android`, `Bundle` (+408 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **17 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -376,16 +371,16 @@ Nodes (11): HistorySyncManager, Boolean, Context, Int, lastMessageId, Long, reco
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `TdlibManager` connect `Telegram Client Integration` to `Background Backup Workers`, `Database Backup Manager`?**
-  _High betweenness centrality (0.063) - this node is a cross-community bridge._
+  _High betweenness centrality (0.066) - this node is a cross-community bridge._
 - **Why does `AutoVaultSetupScreen()` connect `Telegram Client Integration` to `Application Preferences`, `Community 77`?**
-  _High betweenness centrality (0.053) - this node is a cross-community bridge._
-- **Why does `PreferencesManager` connect `Application Preferences` to `Background Backup Workers`, `Telegram Client Integration`?**
-  _High betweenness centrality (0.051) - this node is a cross-community bridge._
+  _High betweenness centrality (0.061) - this node is a cross-community bridge._
+- **Why does `PhotosGridScreen()` connect `Photos Grid and Search UI` to `Community 32`, `Community 65`, `Community 69`, `Community 71`, `Community 72`, `Community 73`, `Image Upload Manager`, `Community 77`, `Community 78`?**
+  _High betweenness centrality (0.060) - this node is a cross-community bridge._
 - **What connects `ManagedActivityResultLauncher`, `IntentSenderRequest`, `androidx` to the rest of the system?**
-  _453 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _427 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Application Preferences` be split into smaller, more focused modules?**
-  _Cohesion score 0.08953418027828192 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.09220779220779221 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
   _Cohesion score 0.05555555555555555 - nodes in this community are weakly interconnected._
 - **Should `Background Backup Workers` be split into smaller, more focused modules?**
-  _Cohesion score 0.0563265306122449 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06620209059233449 - nodes in this community are weakly interconnected._

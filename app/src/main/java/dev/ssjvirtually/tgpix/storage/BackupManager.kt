@@ -170,26 +170,13 @@ open class BackupManager {
             success = withContext(Dispatchers.IO) {
                 val db = UploadDatabase.getDatabase(context)
                 val myDeviceId = PreferencesManager.getDeviceId(context)
+                val currentCount = db.cloudDao().getRecordCountDirect()
                 
-                // 1. Leader Election check
-                val explicitLeaderId = PreferencesManager.getCurrentLeaderDeviceId(context)
-                val isLeader = if (!explicitLeaderId.isNullOrEmpty()) {
-                    explicitLeaderId == myDeviceId
-                } else {
-                    // Default behavior: Oldest registered device (by registration timestamp)
-                    val allDevices = db.deviceDao().getAllDevices()
-                    val oldestDevice = allDevices.minByOrNull { it.registeredAt }
-                    oldestDevice == null || oldestDevice.deviceId == myDeviceId
-                }
-                
-                if (!isLeader) {
-                    val leaderDeviceName = if (!explicitLeaderId.isNullOrEmpty()) {
-                        db.deviceDao().getAllDevices().firstOrNull { it.deviceId == explicitLeaderId }?.deviceName ?: "another device"
-                    } else {
-                        db.deviceDao().getAllDevices().minByOrNull { it.registeredAt }?.deviceName ?: "unknown"
-                    }
-                    TdlibManager.addLog("This device is not the Snapshot Leader (Leader is $leaderDeviceName). Skipping database backup.")
-                    return@withContext false
+                // 1. Check if a newer or identical remote snapshot already exists on Telegram
+                val latestRemoteSnapshot = getLatestSnapshotMetadata(targetChatId)
+                if (latestRemoteSnapshot != null && latestRemoteSnapshot.recordCount >= currentCount) {
+                    TdlibManager.addLog("A newer or identical remote snapshot already exists (Remote records: ${latestRemoteSnapshot.recordCount}, Local records: $currentCount). Skipping database backup.")
+                    return@withContext true
                 }
                 
                 val dbFile = context.getDatabasePath("upload_database")
@@ -228,17 +215,17 @@ open class BackupManager {
                 // 3. Safely lock the database and perform a copy while in a Room transaction
                 val transactionResult = try {
                     db.withTransaction {
-                        val currentCount = db.cloudDao().getRecordCountDirect()
+                        val txCount = db.cloudDao().getRecordCountDirect()
                         val lastCount = PreferencesManager.getLastBackupRecordCount(context)
 
                         // If database is empty but we previously had backups, abort to protect remote
-                        if (currentCount == 0 && lastCount > 0) {
+                        if (txCount == 0 && lastCount > 0) {
                             TdlibManager.addLog("Backup safety check failed: Local DB is empty, aborting upload to protect remote backup.")
                             null
                         } else {
                             val tempFile = File(context.filesDir, "tgpix_backup.db")
                             dbFile.copyTo(tempFile, overwrite = true)
-                            Pair(tempFile, currentCount)
+                            Pair(tempFile, txCount)
                         }
                     }
                 } catch (e: Exception) {
@@ -250,7 +237,7 @@ open class BackupManager {
                     return@withContext false
                 }
 
-                val (tempBackupFile, currentCount) = transactionResult
+                val (tempBackupFile, _) = transactionResult
 
                 if (!tempBackupFile.exists() || tempBackupFile.length() == 0L) {
                     return@withContext false
@@ -341,8 +328,16 @@ open class BackupManager {
         return success
     }
 
-    open suspend fun getLatestSnapshotVersion(chatId: Long): Int {
-        var highestVersion = 0
+    data class SnapshotMetadata(
+        val snapshotVersion: Int,
+        val deviceId: String,
+        val recordCount: Int,
+        val schemaVersion: Int,
+        val timestamp: Long
+    )
+
+    open suspend fun getLatestSnapshotMetadata(chatId: Long): SnapshotMetadata? {
+        var latestMeta: SnapshotMetadata? = null
         try {
             val searchQuery = TdApi.SearchChatMessages().apply {
                 this.chatId = chatId
@@ -363,8 +358,14 @@ open class BackupManager {
                         val jsonStr = captionText.substringAfter("#tgpix_snapshot").trim()
                         val jsonObj = org.json.JSONObject(jsonStr)
                         val version = jsonObj.optInt("snapshotVersion", 0)
-                        if (version > highestVersion) {
-                            highestVersion = version
+                        if (latestMeta == null || version > latestMeta.snapshotVersion) {
+                            latestMeta = SnapshotMetadata(
+                                snapshotVersion = version,
+                                deviceId = jsonObj.optString("deviceId", ""),
+                                recordCount = jsonObj.optInt("recordCount", 0),
+                                schemaVersion = jsonObj.optInt("schemaVersion", 0),
+                                timestamp = jsonObj.optLong("timestamp", 0L)
+                            )
                         }
                     }
                 }
@@ -372,7 +373,11 @@ open class BackupManager {
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        return highestVersion
+        return latestMeta
+    }
+
+    open suspend fun getLatestSnapshotVersion(chatId: Long): Int {
+        return getLatestSnapshotMetadata(chatId)?.snapshotVersion ?: 0
     }
 
     open suspend fun pruneOldSnapshots(chatId: Long) {
